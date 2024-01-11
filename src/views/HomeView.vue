@@ -383,14 +383,14 @@ onMounted(() => {
 }
 .table-container {
   overflow: auto;
-  max-height: 60vh;
+  max-height: 400px;
   margin-top: 20px;
 }
 
 table {
   border-collapse: collapse;
   width: 100%;
-  table-layout: auto;
+  /* table-layout: auto; */
 }
 
 th,
@@ -398,7 +398,7 @@ td {
   border: 1px solid #82818140;
   text-align: center;
   padding: 8px;
-  width: 15%;
+  /* width: 15%; */
 }
 
 th {
