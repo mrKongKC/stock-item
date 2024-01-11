@@ -1,7 +1,12 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 const emits = defineEmits(['update:inputField'])
 const props = defineProps({
+  max: Number,
+  area: {
+    type: Boolean,
+    default: false
+  },
   disable: Boolean,
   inputField: [String, Number],
   type: {
@@ -10,6 +15,10 @@ const props = defineProps({
   },
   error: [Array, Boolean],
   label: {
+    type: String,
+    default: ''
+  },
+  info: {
     type: String,
     default: ''
   },
@@ -35,13 +44,23 @@ const isNumber = (event) => {
 </script>
 <template>
   <div class="input-content">
-    <label for="label" class="label-content">
+    <div class="label-container" v-if="info">
+      <label for="label" class="text-md">
+        {{ label }}
+      </label>
+      <label for="info" class="label-content--info text-md">
+        {{ info }}
+      </label>
+    </div>
+    <label for="label" class="text-md" v-else>
       {{ label }}
     </label>
     <input
+      :maxlength="max"
       v-model="inputText"
       :disabled="disable"
-      class="input-field text-base font-bold base-color"
+      :class="{ 'text-area': area }"
+      class="input-field font-bold base-color"
       :placeholder="placeholder"
       @input="setValue"
       @keypress="isNumber"
@@ -50,13 +69,22 @@ const isNumber = (event) => {
 </template>
 
 <style scoped>
-.label-content {
-  font-size: 16px;
+.label-container {
+  display: flex;
+  justify-content: space-between;
+}
+.label-content--info {
+  color: #fd0a0a;
+}
+
+.text-area {
+  height: 60px;
 }
 
 .input-content {
   display: flex;
-  align-items: center;
+  justify-content: flex-start;
+  flex-direction: column;
   gap: 8px;
   text-align: left;
   width: 100%;
