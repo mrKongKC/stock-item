@@ -6,31 +6,6 @@ const tableLoading = ref(false)
 const tableData = ref([])
 const uniqueLocations = ref([])
 
-// const handleTab = (event, rowIndex, column) => {
-//   if (event.key === 'Tab') {
-//     event.preventDefault() // prevent to going to next column
-
-//     const columns = uniqueLocations.value || [] //declare column
-//     console.log(columns)
-
-//     let nextRowIndex = rowIndex + 1
-//     let nextColumn = column
-
-//     if (nextRowIndex >= tableData.value.length) {
-//       // condition to fix the next value will go to the row
-//       nextRowIndex = 0
-//       nextColumn = columns[(columns.indexOf(column) + 1) % columns.length]
-//     }
-
-//     const nextInputId = `input-${nextRowIndex}-${nextColumn}` //declare the unique id
-//     const nextInput = document.getElementById(nextInputId) // find input by unique id
-
-//     if (nextInput) {
-//       nextInput.focus() //focus element
-//     }
-//   }
-// }
-
 const handleTab = (event, rowIndex, column) => {
   if (event.key === 'Tab') {
     event.preventDefault() // prevent default tab behavior
@@ -60,8 +35,8 @@ const getMaterialList = () => {
     .getMaterialList()
     .then((res) => {
       const response = res
-      const uniqueMaterials = [...new Set(response.map((item) => item.Material))]
-      uniqueLocations.value = [...new Set(response.map((item) => item.Location))]
+      const uniqueMaterials = [...new Set(response.map((item) => item.Material))].sort()
+      uniqueLocations.value = [...new Set(response.map((item) => item.Location))].sort()
 
       tableData.value = uniqueMaterials.map((material) => {
         const row = { Material: material }
@@ -77,6 +52,26 @@ const getMaterialList = () => {
     .finally(() => {
       tableLoading.value = false
     })
+}
+
+const sum = (row) => {
+  let total = 0
+  uniqueLocations.value.forEach((location) => {
+    total += Number(row[location])
+  })
+  return total
+}
+
+const handleInput = (row, location) => {
+  const nonDigitRegex = /[^0-9]/
+  const removeFirstZero = /^0+[1-9]/
+  if (!row[location]) {
+    row[location] = 0
+  } else if (nonDigitRegex.test(row[location])) {
+    row[location] = row[location].toString().replace(/[^0-9]/g, '')
+  } else if (removeFirstZero.test(row[location])) {
+    row[location] = row[location].toString().replace(/^0+/, '')
+  }
 }
 
 onMounted(() => {
@@ -112,16 +107,13 @@ onMounted(() => {
             v-model="scoped.row[location]"
             :id="`input-${scoped.$index}-${location}`"
             @keydown="handleTab($event, scoped.$index, location)"
+            @input="handleInput(scoped.row, location)"
           />
         </template>
       </el-table-column>
       <el-table-column prop="summary" label="Summary" min-width="160" align="center" fixed="right">
         <template #default="scoped">
-          <el-input
-            v-model="scoped.row.address"
-            :id="'input-' + scoped.$index + '-address'"
-            @keydown="handleTab($event, scoped.$index, 'address')"
-          />
+          <el-input  :value="sum(scoped.row)" />
         </template>
       </el-table-column>
     </el-table>
