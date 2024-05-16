@@ -7,7 +7,8 @@ const materialStore = useMaterialStore()
 
 const search = ref('')
 const tableLoading = ref(false)
-const loadingNewSave = ref(true)
+const loadingNewSave = ref(false)
+const dialogFormVisible = ref(false)
 const tableData = ref([])
 const saveFinalMaterial = ref([])
 const uniqueLocations = ref([])
@@ -43,8 +44,17 @@ const searchMaterial = () => {
 }
 
 const saveMaterial = () => {
-  // const query = search.value.toLowerCase()
-  // tableData.value = tableData.value.filter((item) => item.Material.toLowerCase().includes(query))
+  loadingNewSave.value = true
+  saveFinalMaterial.value = materialStore.finalMaterial
+  const unProxyArray = saveFinalMaterial.value.map((proxyObj) => ({ ...proxyObj }))
+  console.log(unProxyArray)
+  setTimeout(() => {
+    loadingNewSave.value = false
+  }, 1000)
+}
+
+const addNew = () => {
+  dialogFormVisible.value = true
 }
 
 const getMaterialList = () => {
@@ -53,7 +63,6 @@ const getMaterialList = () => {
     .getMaterialList()
     .then((res) => {
       const response = res
-      materialStore.setFinalMaterial(response)
       const uniqueMaterials = [...new Set(response.map((item) => item.Material))].sort()
       uniqueLocations.value = [...new Set(response.map((item) => item.Location))].sort()
 
@@ -104,6 +113,27 @@ onMounted(() => {
 </script>
 
 <template>
+  <el-dialog v-model="dialogFormVisible" title="Add Material" width="800">
+    <div class="dialog-content-in-stock">
+      <div class="flex gap-12 flex-align-center">
+        <el-input v-model="search" placeholder="Search Material" class="search-input" size="large">
+        </el-input>
+        <el-button
+          :icon="Search"
+          @click="searchMaterial"
+          class="pt-16 pb-16 pl-15 pr-15"
+          type="primary"
+          style="height: 42px"
+        />
+      </div>
+      <div class="pre-container mt-24 flex justify-center">
+        <pre class="text-md font-bold">
+              {{ materialStore.material }}
+      </pre
+        >
+      </div>
+    </div>
+  </el-dialog>
   <div class="stock-container">
     <div class="stock-container__content">
       <div class="w-100">
@@ -125,7 +155,13 @@ onMounted(() => {
               style="height: 42px"
             />
           </div>
-          <el-button type="primary" class="pt-16 pb-16 pl-15 pr-15" style="height: 42px" plain>
+          <el-button
+            type="primary"
+            class="pt-16 pb-16 pl-15 pr-15"
+            style="height: 42px"
+            plain
+            @click="addNew"
+          >
             <el-icon class="mr-8"><Plus /></el-icon>
             Add
           </el-button>
@@ -236,6 +272,16 @@ onMounted(() => {
       font-weight: 600;
       font-size: 16px;
     }
+  }
+}
+
+.dialog-content-in-stock {
+  .pre-container {
+    background: #ffffff;
+    height: 300px;
+    border-radius: 4px;
+    border: 1px solid $primary-color;
+    overflow-y: auto;
   }
 }
 

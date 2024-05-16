@@ -229,7 +229,7 @@ hr {
 }
 
 .el-input__wrapper {
-  border: 1px solid #bb7777;
+  box-shadow: 0 0 0 1px #bb7777 inset !important;
   .el-input__inner {
     font-size: 14px !important;
     font-weight: 500;
@@ -237,7 +237,7 @@ hr {
 }
 
 .el-input__wrapper.is-focus {
-  box-shadow: 0 0 0 1px $primary-color-hover inset !important;
+  box-shadow: 0 0 0 2px $primary-color inset !important;
 }
 
 .el-button--primary {
@@ -285,7 +285,17 @@ hr {
   }
 }
 
-
 .rotate-animation {
   animation: rotate 1s infinite linear;
 }
+
+.el-dialog__headerbtn:focus .el-dialog__close,
+.el-dialog__headerbtn:hover .el-dialog__close {
+  color: $primary-color !important;
+}
+
+.el-dialog__title{
+  font-weight: 700;
+}
+
+
