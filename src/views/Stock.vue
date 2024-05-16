@@ -102,7 +102,7 @@ onMounted(() => {
             @click="searchMaterial"
             class="pt-16 pb-16 pl-15 pr-15"
             type="primary"
-            style="height: 40px"
+            style="height: 42px"
           />
         </div>
         <el-button type="primary" class="pt-16 pb-16 pl-15 pr-15" style="height: 38px">
