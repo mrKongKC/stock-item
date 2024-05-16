@@ -14,6 +14,7 @@ button {
 
 body {
   background: $white-color;
+  height: 100vh;
 }
 
 hr {
@@ -64,6 +65,10 @@ hr {
 
 .text-xs {
   font-size: 12px;
+}
+
+.text-md {
+  font-size: 18px;
 }
 
 .text-sm {
@@ -188,35 +193,24 @@ hr {
 }
 
 @each $size, $value in $size-list-fixed {
-  @if $size !=auto {
-    .fs-#{$size} {
-      font-size: $value;
-    }
-    @media (max-width: 960px) {
-      .fs-#{$size} {
-        font-size: calc($value - 3px);
-      }
-    }
-  }
-
   .p-#{$size} {
-    padding: $value;
+    padding: $value !important;
   }
 
   .pt-#{$size} {
-    padding-top: $value;
+    padding-top: $value !important;
   }
 
   .pr-#{$size} {
-    padding-right: $value;
+    padding-right: $value !important;
   }
 
   .pb-#{$size} {
-    padding-bottom: $value;
+    padding-bottom: $value !important;
   }
 
   .pl-#{$size} {
-    padding-left: $value;
+    padding-left: $value !important;
   }
 
   .m-#{$size} {
@@ -246,5 +240,47 @@ hr {
 
   .ml-#{$size} {
     margin-left: $value;
+  }
+}
+
+.el-table .background-header {
+  th.el-table__cell.is-leaf {
+    background: $primary-color;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 16px;
+  }
+}
+
+.el-input__wrapper {
+  border: 1px solid #bb7777;
+  .el-input__inner {
+    font-size: 14px !important;
+    font-weight: 500;
+  }
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 1px $primary-color-hover inset !important;
+}
+
+.el-button--primary {
+  color: #fff;
+  background-color: $primary-color !important;
+  border-color: $primary-color !important;
+}
+
+.el-button.el-button--primary-full:hover,
+.el-button--primary:hover {
+  background-color: $primary-color-hover !important;
+}
+
+.el-loading-mask {
+  opacity: 0.7;
+
+  svg.circular {
+    .path {
+      stroke: $primary-color !important;
+    }
   }
 }
