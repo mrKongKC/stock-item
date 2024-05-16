@@ -1,12 +1,15 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import stockApi from '../services/stock.js'
-import { Search } from '@element-plus/icons-vue'
-import { Plus } from '@element-plus/icons-vue'
+import { Loading, Search, Plus, Checked } from '@element-plus/icons-vue'
+import { useMaterialStore } from '@/stores/material'
+const materialStore = useMaterialStore()
 
 const search = ref('')
 const tableLoading = ref(false)
+const loadingNewSave = ref(true)
 const tableData = ref([])
+const saveFinalMaterial = ref([])
 const uniqueLocations = ref([])
 
 const handleTab = (event, rowIndex, column) => {
@@ -32,7 +35,17 @@ const handleTab = (event, rowIndex, column) => {
   }
 }
 
-const searchMaterial = () => {}
+const searchMaterial = () => {
+  const query = search.value.toLowerCase()
+  tableData.value = materialStore.getMaterial.filter((item) =>
+    item.Material.toLowerCase().includes(query)
+  )
+}
+
+const saveMaterial = () => {
+  // const query = search.value.toLowerCase()
+  // tableData.value = tableData.value.filter((item) => item.Material.toLowerCase().includes(query))
+}
 
 const getMaterialList = () => {
   tableLoading.value = true
@@ -40,6 +53,7 @@ const getMaterialList = () => {
     .getMaterialList()
     .then((res) => {
       const response = res
+      materialStore.setFinalMaterial(response)
       const uniqueMaterials = [...new Set(response.map((item) => item.Material))].sort()
       uniqueLocations.value = [...new Set(response.map((item) => item.Location))].sort()
 
@@ -53,6 +67,7 @@ const getMaterialList = () => {
         })
         return row
       })
+      materialStore.setMaterial(tableData.value)
     })
     .finally(() => {
       tableLoading.value = false
@@ -64,19 +79,23 @@ const sum = (row) => {
   uniqueLocations.value.forEach((location) => {
     total += Number(row[location])
   })
-  return total
+  return total.toLocaleString()
 }
 
 const handleInput = (row, location) => {
   const nonDigitRegex = /[^0-9]/
-  const removeFirstZero = /^0+[1-9]/
+  const removeLeadingZeros = /^0+[1-9]/
+
   if (!row[location]) {
     row[location] = 0
+  } else if (removeLeadingZeros.test(row[location])) {
+    row[location] = row[location].toString().replace(/^0+/, '')
   } else if (nonDigitRegex.test(row[location])) {
     row[location] = row[location].toString().replace(/[^0-9]/g, '')
-  } else if (removeFirstZero.test(row[location])) {
-    row[location] = row[location].toString().replace(/^0+/, '')
   }
+  row[location] = Number(row[location]) || 0
+  materialStore.updateMaterial(row, location, row[location])
+  searchMaterial()
 }
 
 onMounted(() => {
@@ -87,28 +106,30 @@ onMounted(() => {
 <template>
   <div class="stock-container">
     <div class="stock-container__content">
-      <h2 class="mb-12 header">Stock Material</h2>
-      <div class="mb-24 flex-end justify-between">
-        <div class="mt-4 flex-end gap-12" style="width: 50%">
-          <el-input
-            v-model="search"
-            placeholder="Search Material"
-            class="search-input"
-            size="large"
-          >
-          </el-input>
-          <el-button
-            :icon="Search"
-            @click="searchMaterial"
-            class="pt-16 pb-16 pl-15 pr-15"
-            type="primary"
-            style="height: 42px"
-          />
+      <div class="w-100">
+        <h2 class="mb-24 header">Stock Material</h2>
+        <div class="mb-24 flex-end justify-between">
+          <div class="mt-4 flex-end gap-12" style="width: 50%">
+            <el-input
+              v-model="search"
+              placeholder="Search Material"
+              class="search-input"
+              size="large"
+            >
+            </el-input>
+            <el-button
+              :icon="Search"
+              @click="searchMaterial"
+              class="pt-16 pb-16 pl-15 pr-15"
+              type="primary"
+              style="height: 42px"
+            />
+          </div>
+          <el-button type="primary" class="pt-16 pb-16 pl-15 pr-15" style="height: 42px" plain>
+            <el-icon class="mr-8"><Plus /></el-icon>
+            Add
+          </el-button>
         </div>
-        <el-button type="primary" class="pt-16 pb-16 pl-15 pr-15" style="height: 38px">
-          <el-icon class="mr-8"><Plus /></el-icon>
-          Add
-        </el-button>
       </div>
       <el-table
         :data="tableData"
@@ -147,6 +168,8 @@ onMounted(() => {
               size="large"
               v-model="scoped.row[location]"
               :id="`input-${scoped.$index}-${location}`"
+              :formatter="(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')"
+              :parser="(value) => value.replace(/\$\s?|(,*)/g, '')"
               @keydown="handleTab($event, scoped.$index, location)"
               @input="handleInput(scoped.row, location)"
             />
@@ -164,8 +187,33 @@ onMounted(() => {
           </template>
         </el-table-column>
       </el-table>
-      <div class="save-container mt-24 mb-24">
-        <h3 class="pl-20">Save Material</h3>
+      <div
+        class="flex mt-24"
+        :class="{
+          'justify-between': saveFinalMaterial.length > 0,
+          'justify-end': saveFinalMaterial.length === 0
+        }"
+      >
+        <div class="save-container overflow" v-if="saveFinalMaterial.length > 0">
+          <p class="font-bold text-md p-20 sticky header-output" style="top: 0px">
+            Save Materials
+            <el-icon class="rotate-animation" v-if="loadingNewSave"><Loading /></el-icon>
+          </p>
+          <div class="flex justify-center" :class="{ 'low-opacity': loadingNewSave }">
+            <pre class="text-md font-bold pb-20 pl-20 pr-20 pt-0">
+              {{ saveFinalMaterial }}
+            </pre>
+          </div>
+        </div>
+        <el-button
+          type="primary"
+          class="pt-16 pb-16 pl-15 pr-15"
+          style="height: 42px; width: 120px"
+          @click="saveMaterial"
+        >
+          <el-icon class="mr-8"><Checked /></el-icon>
+          Save
+        </el-button>
       </div>
     </div>
   </div>
@@ -194,13 +242,25 @@ onMounted(() => {
 .stock-container {
   display: flex;
   justify-content: center;
-  height: 100vh;
-  overflow-y: scroll;
-  margin-bottom: 52px;
-  margin-top: 52px;
+  overflow: hidden;
+  height: 100%;
+
+  .low-opacity {
+    opacity: 0.1;
+  }
+
+  .header-output {
+    background-color: $primary-color;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #ffffff;
+    z-index: 10;
+  }
 
   .stock-container__content {
     max-width: 90%;
+    width: 100%;
 
     .header {
       background-color: $primary-color;
@@ -226,10 +286,11 @@ onMounted(() => {
 
     .save-container {
       background: #ffffff;
-      width: 100%;
       height: 300px;
-      border-radius: 8px;
+      width: 60%;
+      border-radius: 4px;
       border: 1px solid $primary-color;
+      margin-bottom: 52px;
     }
   }
 }

@@ -15,6 +15,11 @@ button {
 body {
   background: $white-color;
   height: 100vh;
+  overflow: auto;
+}
+
+.overflow {
+  overflow-y: auto;
 }
 
 hr {
@@ -150,39 +155,8 @@ hr {
   white-space: nowrap;
 }
 
-@keyframes shake {
-  0% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(-5px);
-  }
-  50% {
-    transform: translateX(5px);
-  }
-  75% {
-    transform: translateX(-5px);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.shake-animation {
-  animation: shake 0.3s;
-}
-
-.rotate-animation {
-  animation: rotate 1s infinite linear;
+.sticky {
+  position: sticky;
 }
 
 .extend-row {
@@ -249,6 +223,8 @@ hr {
     color: #ffffff;
     font-weight: 700;
     font-size: 16px;
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
   }
 }
 
@@ -275,6 +251,17 @@ hr {
   background-color: $primary-color-hover !important;
 }
 
+.el-button--primary.is-plain:not(.is-text, .el-button.is-disabled) {
+  color: $primary-color-hover !important;
+  border-color: $primary-color-hover !important;
+  background-color: #fff !important;
+
+  &:hover {
+    color: #ffffff !important;
+    background-color: $primary-color-hover !important;
+  }
+}
+
 .el-loading-mask {
   opacity: 0.7;
 
@@ -283,4 +270,22 @@ hr {
       stroke: $primary-color !important;
     }
   }
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+.rotate-animation {
+  animation: rotate 1s infinite linear;
 }

@@ -7,7 +7,8 @@
 <style scoped lang="scss">
 .main-container {
   position: relative;
-  height: 100vh;
   background-color: #fafafa;
+  height: 100vh;
+  padding: 24px 0;
 }
 </style>
