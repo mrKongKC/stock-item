@@ -6,17 +6,11 @@ import { useMaterialStore } from '@/stores/material'
 export default {
   getMaterialList() {
     const materialStore = useMaterialStore()
+    materialStore.setAllMaterial(allMockData.materials)
     return new Promise((resolve) => {
       setTimeout(() => {
-        materialStore.setFinalMaterial(mockData.materials)
-        resolve(materialStore.finalMaterial)
-      }, 800)
-    })
-  },
-  getAllMaterial() {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(allMockData.materials)
+        materialStore.setDefaultMaterial(mockData.materials)
+        resolve(materialStore.defaultMaterial)
       }, 800)
     })
   }

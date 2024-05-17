@@ -3,13 +3,17 @@ import { onMounted, ref } from 'vue'
 import stockApi from '../services/stock.js'
 import { Loading, Search, Plus, Checked } from '@element-plus/icons-vue'
 import { useMaterialStore } from '@/stores/material'
+import { ElNotification } from 'element-plus'
 const materialStore = useMaterialStore()
 
 const search = ref('')
+const searchAll = ref('')
 const tableLoading = ref(false)
 const loadingNewSave = ref(false)
+const loadingSearch = ref(false)
 const dialogFormVisible = ref(false)
 const tableData = ref([])
+const resultSearchAllMaterial = ref([])
 const saveFinalMaterial = ref([])
 const uniqueLocations = ref([])
 
@@ -36,6 +40,41 @@ const handleTab = (event, rowIndex, column) => {
   }
 }
 
+const addNew = () => {
+  new Promise((resolve) => {
+    const latestMaterial = materialStore.defaultMaterial.length
+    resultSearchAllMaterial.value.forEach((material) => {
+      const exists = materialStore.defaultMaterial.some(
+        (existingMaterial) =>
+          existingMaterial.Material === material.Material &&
+          existingMaterial.Location === material.Location
+      )
+      if (!exists) {
+        materialStore.addMaterial(material)
+      }
+    })
+    resolve(latestMaterial)
+  }).then((latestMaterial) => {
+    if (latestMaterial === materialStore.defaultMaterial.length) {
+      ElNotification({
+        title: 'Warning',
+        message: 'Materials already exist',
+        type: 'warning',
+        duration: 2000
+      })
+    } else {
+      ElNotification({
+        title: 'Success',
+        message: 'Successfully added materials',
+        type: 'success',
+        duration: 2000
+      })
+      dialogFormVisible.value = false
+      getMaterialList()
+    }
+  })
+}
+
 const searchMaterial = () => {
   const query = search.value.toLowerCase()
   tableData.value = materialStore.getMaterial.filter((item) =>
@@ -43,18 +82,33 @@ const searchMaterial = () => {
   )
 }
 
+const searchAllMaterial = () => {
+  loadingSearch.value = true
+  setTimeout(() => {
+    const query = searchAll.value.toLowerCase()
+    resultSearchAllMaterial.value = materialStore.getAllMaterials.filter(
+      (item) => item.Material.toLowerCase() === query
+    )
+    loadingSearch.value = false
+  }, 800)
+}
+
 const saveMaterial = () => {
   loadingNewSave.value = true
-  saveFinalMaterial.value = materialStore.finalMaterial
+  const result = materialStore.getMaterial.flatMap((material) => {
+    const { Material, ...location } = material
+    return Object.entries(location).map(([Location, QTY]) => ({
+      Material,
+      Location,
+      QTY
+    }))
+  })
+  saveFinalMaterial.value = result
   const unProxyArray = saveFinalMaterial.value.map((proxyObj) => ({ ...proxyObj }))
-  console.log(unProxyArray)
+  console.log(unProxyArray) //submit finale value
   setTimeout(() => {
     loadingNewSave.value = false
   }, 1000)
-}
-
-const addNew = () => {
-  dialogFormVisible.value = true
 }
 
 const getMaterialList = () => {
@@ -76,6 +130,7 @@ const getMaterialList = () => {
         })
         return row
       })
+
       materialStore.setMaterial(tableData.value)
     })
     .finally(() => {
@@ -113,24 +168,56 @@ onMounted(() => {
 </script>
 
 <template>
-  <el-dialog v-model="dialogFormVisible" title="Add Material" width="800">
+  <el-dialog v-model="dialogFormVisible" title="Add Material" width="450">
     <div class="dialog-content-in-stock">
       <div class="flex gap-12 flex-align-center">
-        <el-input v-model="search" placeholder="Search Material" class="search-input" size="large">
+        <el-input
+          v-model="searchAll"
+          placeholder="Search Material"
+          class="search-input"
+          size="large"
+        >
         </el-input>
         <el-button
           :icon="Search"
-          @click="searchMaterial"
+          @click="searchAllMaterial"
           class="pt-16 pb-16 pl-15 pr-15"
           type="primary"
           style="height: 42px"
         />
       </div>
-      <div class="pre-container mt-24 flex justify-center">
-        <pre class="text-md font-bold">
-              {{ materialStore.material }}
+      <div
+        class="pre-container mt-12 flex justify-center"
+        :class="{ 'flex-align-center': loadingSearch }"
+      >
+        <el-icon class="rotate-animation primary-color" style="font-size: 32px" v-if="loadingSearch"
+          ><Loading
+        /></el-icon>
+        <pre
+          class="text-md font-bold"
+          v-else-if="resultSearchAllMaterial.length > 0 && !loadingSearch"
+        >
+              {{ resultSearchAllMaterial }}
       </pre
         >
+        <p
+          class="flex-align-center text-md"
+          v-else-if="resultSearchAllMaterial.length === 0 && !loadingSearch"
+        >
+          No data
+        </p>
+      </div>
+      <div class="mt-12 flex">
+        <el-button
+          type="primary"
+          class="pt-16 pb-16 pl-15 pr-15 w-100"
+          style="height: 42px"
+          :disabled="resultSearchAllMaterial.length === 0"
+          @click="addNew"
+        >
+          <el-icon class="mr-8"><Plus /></el-icon>
+          Add
+        </el-button>
       </div>
     </div>
   </el-dialog>
@@ -160,7 +247,7 @@ onMounted(() => {
             class="pt-16 pb-16 pl-15 pr-15"
             style="height: 42px"
             plain
-            @click="addNew"
+            @click="dialogFormVisible = true"
           >
             <el-icon class="mr-8"><Plus /></el-icon>
             Add
@@ -288,7 +375,7 @@ onMounted(() => {
 .stock-container {
   display: flex;
   justify-content: center;
-  overflow: hidden;
+  overflow: scroll;
   height: 100%;
 
   .low-opacity {

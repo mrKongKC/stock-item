@@ -29,7 +29,7 @@ hr {
 }
 
 .primary-color {
-  color: $primary-color;
+  color: $primary-color !important;
 }
 
 .primary-bg {
@@ -294,8 +294,11 @@ hr {
   color: $primary-color !important;
 }
 
-.el-dialog__title{
+.el-dialog__title {
   font-weight: 700;
 }
 
-
+.el-button.is-disabled {
+  background-color: #c5d1de !important;
+  border: 0px transparent;
+}
