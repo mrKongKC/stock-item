@@ -9,6 +9,5 @@
   position: relative;
   background-color: #fafafa;
   height: 100vh;
-  padding: 24px 0;
 }
 </style>

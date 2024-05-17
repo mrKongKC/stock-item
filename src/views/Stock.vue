@@ -224,9 +224,9 @@ onMounted(() => {
   <div class="stock-container">
     <div class="stock-container__content">
       <div class="w-100">
-        <h2 class="mb-24 header">Stock Material</h2>
-        <div class="mb-24 flex-end justify-between">
-          <div class="mt-4 flex-end gap-12" style="width: 50%">
+        <p class="mb-24 header font-bold text-2xl">Stock Material</p>
+        <div class="mb-24 header__search-box">
+          <div class="mt-4 flex-end gap-12 input-search">
             <el-input
               v-model="search"
               placeholder="Search Material"
@@ -271,7 +271,7 @@ onMounted(() => {
           prop="Material"
           label="Material"
           align="center"
-          min-width="160"
+          min-width="120"
           fixed="left"
         >
           <template #default="scoped">
@@ -301,7 +301,7 @@ onMounted(() => {
         <el-table-column
           prop="summary"
           label="Summary"
-          min-width="160"
+          min-width="140"
           align="center"
           fixed="right"
         >
@@ -313,7 +313,7 @@ onMounted(() => {
       <div
         class="flex mt-24"
         :class="{
-          'justify-between': saveFinalMaterial.length > 0,
+          'display-material': saveFinalMaterial.length > 0,
           'justify-end': saveFinalMaterial.length === 0
         }"
       >
@@ -395,6 +395,10 @@ onMounted(() => {
     max-width: 90%;
     width: 100%;
 
+    @media (max-width: 425px) {
+      max-width: 100%;
+    }
+
     .header {
       background-color: $primary-color;
       padding-bottom: 4px;
@@ -403,6 +407,25 @@ onMounted(() => {
       box-shadow:
         0 4px 6px -1px #0000001a,
         0 2px 4px -2px #0000001a;
+    }
+
+    .header__search-box {
+      display: flex;
+      justify-content: space-between;
+
+      @media (max-width: 425px) {
+        flex-direction: column;
+        padding: 0 4px;
+      }
+
+      .input-search {
+        width: 50%;
+
+        @media (max-width: 425px) {
+          width: 100%;
+          margin-bottom: 12px;
+        }
+      }
     }
 
     .extend-row {
@@ -417,6 +440,16 @@ onMounted(() => {
       width: 100%;
     }
 
+    .display-material {
+      justify-content: space-between;
+
+      @media (max-width: 425px) {
+        justify-content: initial;
+        align-items: center;
+        flex-direction: column;
+      }
+    }
+
     .save-container {
       background: #ffffff;
       height: 300px;
@@ -424,6 +457,10 @@ onMounted(() => {
       border-radius: 4px;
       border: 1px solid $primary-color;
       margin-bottom: 52px;
+
+      @media (max-width: 425px) {
+        width: 100%;
+      }
     }
   }
 }
